@@ -1,0 +1,73 @@
+<mvc:View controllerName="nmpspc.attachfileui.controller.attachfiles"
+   
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns:u="sap.ui.unified" xmlns:upload="sap.m.upload"
+    xmlns="sap.m">
+    <Page id="page" title="{i18n>title}">
+        <content>
+        <!-- <FlexBox direction="Column" class="sapUiLargeMargin">
+                            <Label text="Attach File" labelFor="fileUploader" required="true"/>
+                            <u:FileUploader id="__fileUploader" tooltip="Upload your file to DB" change="onFileChange"/>
+                            <Button text="Upload" press="onUploadFile" type="Emphasized"/>
+                            	<Image ariaDetails="detailsActiveImage" src="media_srv/v2/media/MediaFile(1)/content"
+					decorative="false"/>
+                        </FlexBox> -->
+
+                        <upload:UploadSet class="sapUiSmallMarginTop"
+				id="UploadSet"
+				noDataDescription="No Data available"
+				instantUpload="true"
+				showIcons="true"
+				uploadEnabled="true"
+				terminationEnabled="true"
+				fileTypes="pdf"
+				maxFileNameLength="100"
+				maxFileSize="200"
+				mediaTypes="application/pdf"
+                uploadCompleted="onUploadCompleted"
+                beforeUploadStarts="onBeforeUploadStarts"
+				items="{path: 'itemsModel>/itemsData', templateShareable: false}"
+				mode="MultiSelect"
+				selectionChanged="onSelectionChange"
+                fileTypeMismatch="onFileTypeMismatch"
+                beforeItemAdded="checkMandtField"
+                > <!--   uploadCompleted="onCallGetCSRFTokenforPDF"-->
+			<upload:toolbar>
+				<OverflowToolbar>
+					 <Title text="Attachments"/>
+					<ToolbarSpacer/>
+					<!--<Button
+							id="uploadSelectedButton"
+							text="Upload selected"
+							press="onUploadSelectedButton"/>-->
+					<!--<Button
+							id="downloadSelectedButton"
+							text="Download selected"
+							press="onDownloadSelectedButton"/>-->
+					<!--<Button
+							id="versionButton"
+							enabled="false"
+							text="Upload a new version"
+							press="onVersionUpload"/>-->
+					<upload:UploadSetToolbarPlaceholder />
+				</OverflowToolbar>
+			</upload:toolbar>
+			<upload:items>
+				<upload:UploadSetItem
+						fileName="{itemsModel>fileName}"
+						mediaType="{itemsModel>mediaType}"
+						url="{itemsModel>url}" 
+						statuses="{path: 'itemsModel>statuses', templateShareable: false}"
+                        openPressed="uploadSetDownload" removePressed="uploadSetDelete"
+                        visibleEdit="false"> <!-- removePressed="uploadSetDelete"-->
+					<upload:statuses>
+						<ObjectStatus
+								title="{itemsModel>title}"
+								text="{itemsModel>text}"
+								active="{itemsModel>active}"/>
+					</upload:statuses>
+				</upload:UploadSetItem>
+			</upload:items>
+		</upload:UploadSet>
+                        </content>
+    </Page>
+</mvc:View>

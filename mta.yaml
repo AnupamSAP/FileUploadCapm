@@ -1,0 +1,121 @@
+_schema-version: "3.1"
+ID: Attachfile
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: Attachfile-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: Attachfile-db
+  - name: Attachfile-auth
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    readiness-health-check-http-endpoint: /health
+    readiness-health-check-type: http
+  build-parameters:
+    builder: npm
+- name: Attachfile-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: Attachfile-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: Attachfile-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: Attachfile-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - nmpspcattachfileui.zip
+      name: nmpspcattachfileui
+      target-path: resources/
+- name: nmpspcattachfileui
+  type: html5
+  path: app/attachfileui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: Attachfile-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: Attachfile-destination-service
+    parameters:
+      content-target: true
+  - name: Attachfile-repo-host
+    parameters:
+      service-key:
+        name: Attachfile-repo-host-key
+  - name: Attachfile-auth
+    parameters:
+      service-key:
+        name: Attachfile-auth-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: attachrouter_Attachfile_repo_host
+          ServiceInstanceName: Attachfile-html5-srv
+          ServiceKeyName: Attachfile-repo-host-key
+          sap.cloud.service: attachrouter
+        - Authentication: OAuth2UserTokenExchange
+          Name: attachrouter_Attachfile_auth
+          ServiceInstanceName: Attachfile-auth
+          ServiceKeyName: Attachfile-auth-key
+          sap.cloud.service: attachrouter
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+resources:
+- name: Attachfile-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: Attachfile-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: Attachfile-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: Attachfile-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: Attachfile-html5-srv
+    service-plan: app-host
+- name: Attachfile-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      version: 1.0.0
+    service: destination
+    service-name: Attachfile-destination-service
+    service-plan: lite
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production

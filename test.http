@@ -1,0 +1,6 @@
+### 
+http://localhost:4004/media/MediaFile
+
+###
+DELETE http://localhost:4004/media/MediaFile(e0ca6640-6e7c-42d3-aa3c-eabd65f41fb6)
+Content-Type : application/pdf
